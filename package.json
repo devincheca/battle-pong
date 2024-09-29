@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/devincheca/battle-pong/issues"
   },
-  "homepage": "https://github.com/devincheca/battle-pong#readme"
+  "homepage": "https://github.com/devincheca/battle-pong#readme",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
 }
