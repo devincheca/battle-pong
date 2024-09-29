@@ -1,0 +1,19 @@
+{
+  "name": "battle-pong",
+  "version": "1.0.0",
+  "description": "Battle Pong game with AI opponent and online support for online play",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devincheca/battle-pong.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devincheca/battle-pong/issues"
+  },
+  "homepage": "https://github.com/devincheca/battle-pong#readme"
+}
