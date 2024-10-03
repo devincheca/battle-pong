@@ -1,14 +1,12 @@
 import React from 'react';
-import nextMove from './src/services/tfRecommendation';
+
+// Containers
+import Game from './src/containers/Game/Game';
 
 function App() {
-  console.log('nextMove: ', nextMove());
   return (
-    <div>
-      <h1>Hello, React with Parcel.js</h1>
-    </div>
+    <Game />
   );
 }
 
 export default App;
-
