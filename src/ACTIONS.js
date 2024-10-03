@@ -1,0 +1,4 @@
+export const ACTIONS = {
+  SAVE_CANVAS_REF: 'SAVE_CANVAS_REF',
+  MOVE_BALLS: 'MOVE_BALLS',
+}
