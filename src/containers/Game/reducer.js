@@ -13,12 +13,13 @@ export function reducer(state, { type, payload }) {
         state.activeBalls[crypto.randomUUID()] = {
           x: getRandomValidX(),
           y: getRandomValidY(),
-          dx: 2,
-          dy: 2,
+          dx: 5,
+          dy: 5,
         };
       }
 
     case ACTIONS.MOVE_BALLS:
+      // Compute wall bounces
       state.activeBalls = Object.keys(state.activeBalls)
         .reduce((acc, key) => {
           const activeBall = state.activeBalls[key];
@@ -31,6 +32,28 @@ export function reducer(state, { type, payload }) {
               ...activeBall,
               x: activeBall.x + activeBall.dx,
               y: activeBall.y + activeBall.dy,
+            },
+          };
+        }, {});
+
+      // Computer ball bounces
+      state.activeX = Object.keys(state.activeBalls)
+        .reduce((acc, key) => ({ ...acc, [state.activeBalls[key].x]: key }), {});
+      state.activeY = Object.keys(state.activeBalls)
+        .reduce((acc, key) => ({ ...acc, [state.activeBalls[key].y]: key }), {});
+      state.activeBalls = Object.keys(state.activeBalls)
+        .reduce((acc, key) => {
+          const activeBall = state.activeBalls[key];
+          const { x, y } = activeBall;
+          let { dx, dy } = activeBall;
+          if (state.activeX[x] && state.activeX[x] !== key) dx = dx * -1;
+          if (state.activeY[y] && state.activeY[y] !== key) dy = dy * -1;
+          return {
+            ...acc,
+            [key]: {
+              ...activeBall,
+              dx,
+              dy,
             },
           };
         }, {});
@@ -47,6 +70,8 @@ export const initialState = {
   canvasContext: null,
 
   activeBalls: {},
+  activeX: {},
+  activeY: {},
 };
 
 export const getRandomValidX = () => {
