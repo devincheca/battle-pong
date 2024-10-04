@@ -28932,11 +28932,12 @@ function reducer(state, _ref) {
         state.activeBalls[crypto.randomUUID()] = {
           x: _getRandomValidX(),
           y: _getRandomValidY(),
-          dx: 2,
-          dy: 2
+          dx: 5,
+          dy: 5
         };
       }
     case _ACTIONS.ACTIONS.MOVE_BALLS:
+      // Compute wall bounces
       state.activeBalls = Object.keys(state.activeBalls).reduce(function (acc, key) {
         var activeBall = state.activeBalls[key];
         var x = activeBall.x,
@@ -28948,6 +28949,27 @@ function reducer(state, _ref) {
           y: activeBall.y + activeBall.dy
         })));
       }, {});
+
+      // Computer ball bounces
+      state.activeX = Object.keys(state.activeBalls).reduce(function (acc, key) {
+        return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, state.activeBalls[key].x, key));
+      }, {});
+      state.activeY = Object.keys(state.activeBalls).reduce(function (acc, key) {
+        return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, state.activeBalls[key].y, key));
+      }, {});
+      state.activeBalls = Object.keys(state.activeBalls).reduce(function (acc, key) {
+        var activeBall = state.activeBalls[key];
+        var x = activeBall.x,
+          y = activeBall.y;
+        var dx = activeBall.dx,
+          dy = activeBall.dy;
+        if (state.activeX[x] && state.activeX[x] !== key) dx = dx * -1;
+        if (state.activeY[y] && state.activeY[y] !== key) dy = dy * -1;
+        return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread(_objectSpread({}, activeBall), {}, {
+          dx: dx,
+          dy: dy
+        })));
+      }, {});
     default:
       break;
   }
@@ -28956,7 +28978,9 @@ function reducer(state, _ref) {
 var initialState = exports.initialState = {
   canvasRef: null,
   canvasContext: null,
-  activeBalls: {}
+  activeBalls: {},
+  activeX: {},
+  activeY: {}
 };
 var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
   var x = Math.round(Math.random() * 1000);
@@ -28994,7 +29018,7 @@ var BallIllustrator = exports.BallIllustrator = /*#__PURE__*/function () {
           x = _this$activeBalls$key.x,
           y = _this$activeBalls$key.y;
         _this.ctx.beginPath();
-        _this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        _this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
         _this.ctx.stroke();
       });
     }
@@ -29039,7 +29063,7 @@ function Canvas() {
         return dispatch({
           type: _ACTIONS.ACTIONS.MOVE_BALLS
         });
-      }, 1);
+      }, 10);
     }
   }, [Object.keys(state.activeBalls)]);
   return /*#__PURE__*/_react.default.createElement("canvas", {
@@ -29167,7 +29191,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62240" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55545" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

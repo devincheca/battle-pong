@@ -8,7 +8,7 @@ export class BallIllustrator {
       .map(key => {
         const { x, y } = this.activeBalls[key];
         this.ctx.beginPath();
-        this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
         this.ctx.stroke();
       });
   }

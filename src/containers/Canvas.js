@@ -26,7 +26,7 @@ export default function Canvas() {
       illustrator.ctx = state.canvasContext;
       illustrator.activeBalls = state.activeBalls;
       illustrator.drawBalls();
-      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 1);
+      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 10);
     }
   }, [Object.keys(state.activeBalls)])
 
