@@ -28893,7 +28893,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.ACTIONS = void 0;
 var ACTIONS = exports.ACTIONS = {
   SAVE_CANVAS_REF: 'SAVE_CANVAS_REF',
-  MOVE_BALLS: 'MOVE_BALLS'
+  MOVE_BALLS: 'MOVE_BALLS',
+  LEFT_MOVE: 'LEFT_MOVE',
+  RIGHT_MOVE: 'RIGHT_MOVE'
 };
 },{}],"src/CONSTANTS.js":[function(require,module,exports) {
 "use strict";
@@ -28903,8 +28905,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = void 0;
 var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
-var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 375;
-var CANVAS_WIDTH = exports.CANVAS_WIDTH = 375;
+var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
+var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
 },{}],"src/containers/Game/reducer.js":[function(require,module,exports) {
 "use strict";
 
@@ -28936,6 +28938,7 @@ function reducer(state, _ref) {
           dy: 5
         };
       }
+      break;
     case _ACTIONS.ACTIONS.MOVE_BALLS:
       // Compute wall bounces
       state.activeBalls = Object.keys(state.activeBalls).reduce(function (acc, key) {
@@ -28970,6 +28973,15 @@ function reducer(state, _ref) {
           dy: dy
         })));
       }, {});
+      break;
+    case _ACTIONS.ACTIONS.LEFT_MOVE:
+      var newLeft = state.left - 10;
+      state.left = newLeft < 0 ? state.left : newLeft;
+      break;
+    case _ACTIONS.ACTIONS.RIGHT_MOVE:
+      var newRight = state.left + 10;
+      state.left = newRight > 302 ? state.left : newRight;
+      break;
     default:
       break;
   }
@@ -28980,7 +28992,8 @@ var initialState = exports.initialState = {
   canvasContext: null,
   activeBalls: {},
   activeX: {},
-  activeY: {}
+  activeY: {},
+  left: 152
 };
 var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
   var x = Math.round(Math.random() * 1000);
@@ -29038,15 +29051,19 @@ var _ACTIONS = require("../ACTIONS");
 var _ballHandler = require("../services/ballHandler");
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
-// Constants
-
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // Constants
 // Services
-
 function Canvas() {
   var canvasRef = (0, _react.useRef)(null);
   var _useContext = (0, _react.useContext)(_Game.GameContext),
     state = _useContext.state,
     dispatch = _useContext.dispatch;
+  var left = state.left;
   (0, _react.useEffect)(function () {
     dispatch({
       type: _ACTIONS.ACTIONS.SAVE_CANVAS_REF,
@@ -29066,14 +29083,71 @@ function Canvas() {
       }, 10);
     }
   }, [Object.keys(state.activeBalls)]);
-  return /*#__PURE__*/_react.default.createElement("canvas", {
+  var border = {
+    borderTop: '.1em solid black',
+    borderLeft: '.1em solid black',
+    borderRight: '.1em solid black'
+  };
+  return /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("canvas", {
+    style: _objectSpread({}, border),
     ref: canvasRef,
     id: _CONSTANTS.CANVAS_ID,
     width: _CONSTANTS.CANVAS_WIDTH,
     height: _CONSTANTS.CANVAS_HEIGHT
-  });
+  }), /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("span", {
+    style: {
+      position: 'relative',
+      left: "".concat(left, "px"),
+      backgroundColor: 'red',
+      borderBottomLeftRadius: '5em',
+      borderBottomRightRadius: '5em',
+      padding: '.5em',
+      color: 'red'
+    }
+  }, "VVV")));
 }
-},{"react":"node_modules/react/index.js","../CONSTANTS":"src/CONSTANTS.js","./Game/Game":"src/containers/Game/Game.js","../ACTIONS":"src/ACTIONS.js","../services/ballHandler":"src/services/ballHandler.js"}],"src/containers/Game/Game.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","../CONSTANTS":"src/CONSTANTS.js","./Game/Game":"src/containers/Game/Game.js","../ACTIONS":"src/ACTIONS.js","../services/ballHandler":"src/services/ballHandler.js"}],"src/containers/DPad.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = DPad;
+var _react = _interopRequireWildcard(require("react"));
+var _Game = require("./Game/Game");
+var _ACTIONS = require("../ACTIONS");
+function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function DPad() {
+  var _useContext = (0, _react.useContext)(_Game.GameContext),
+    dispatch = _useContext.dispatch;
+  return /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("button", {
+    onClick: function onClick() {
+      return dispatch({
+        type: _ACTIONS.ACTIONS.LEFT_MOVE
+      });
+    }
+  }, "<"), /*#__PURE__*/_react.default.createElement("button", {
+    onClick: function onClick() {
+      return dispatch({
+        type: _ACTIONS.ACTIONS.RIGHT_MOVE
+      });
+    }
+  }, ">"));
+}
+},{"react":"node_modules/react/index.js","./Game/Game":"src/containers/Game/Game.js","../ACTIONS":"src/ACTIONS.js"}],"src/containers/ActionButtons.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = ActionButtons;
+var _react = _interopRequireDefault(require("react"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function ActionButtons() {
+  return /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("button", null, "Kick"));
+}
+},{"react":"node_modules/react/index.js"}],"src/containers/Game/Game.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29084,6 +29158,8 @@ exports.default = Game;
 var _react = _interopRequireWildcard(require("react"));
 var _reducer = require("./reducer");
 var _Canvas = _interopRequireDefault(require("../Canvas"));
+var _DPad = _interopRequireDefault(require("../DPad"));
+var _ActionButtons = _interopRequireDefault(require("../ActionButtons"));
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
@@ -29102,16 +29178,18 @@ function Game() {
     dispatch = _useReducer2[1];
   return /*#__PURE__*/_react.default.createElement("div", {
     style: {
-      textAlign: 'center'
+      display: 'flex',
+      justifyContent: 'space-evenly',
+      alignItems: 'center'
     }
   }, /*#__PURE__*/_react.default.createElement(GameContext.Provider, {
     value: {
       state: state,
       dispatch: dispatch
     }
-  }, /*#__PURE__*/_react.default.createElement(_Canvas.default, null)));
+  }, /*#__PURE__*/_react.default.createElement(_DPad.default, null), /*#__PURE__*/_react.default.createElement(_Canvas.default, null), /*#__PURE__*/_react.default.createElement(_ActionButtons.default, null)));
 }
-},{"react":"node_modules/react/index.js","./reducer":"src/containers/Game/reducer.js","../Canvas":"src/containers/Canvas.js"}],"App.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","./reducer":"src/containers/Game/reducer.js","../Canvas":"src/containers/Canvas.js","../DPad":"src/containers/DPad.js","../ActionButtons":"src/containers/ActionButtons.js"}],"App.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29191,7 +29269,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55545" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56683" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

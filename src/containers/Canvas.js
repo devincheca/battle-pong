@@ -13,6 +13,8 @@ export default function Canvas() {
 
   const { state, dispatch } = useContext(GameContext);
 
+  const { left } = state;
+
   useEffect(() => {
     dispatch({
       type: ACTIONS.SAVE_CANVAS_REF,
@@ -30,7 +32,26 @@ export default function Canvas() {
     }
   }, [Object.keys(state.activeBalls)])
 
+  const border = {
+    borderTop: '.1em solid black',
+    borderLeft: '.1em solid black',
+    borderRight: '.1em solid black',
+  };
+
   return (
-    <canvas ref={canvasRef} id={CANVAS_ID} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
+    <div>
+      <canvas style={{ ...border }} ref={canvasRef} id={CANVAS_ID} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
+      <div>
+        <span style={{
+          position: 'relative',
+          left: `${left}px`,
+          backgroundColor: 'red',
+          borderBottomLeftRadius: '5em',
+          borderBottomRightRadius: '5em',
+          padding: '.5em',
+          color: 'red',
+        }}>VVV</span>
+      </div>
+    </div>
   )
 }

@@ -17,6 +17,7 @@ export function reducer(state, { type, payload }) {
           dy: 5,
         };
       }
+      break;
 
     case ACTIONS.MOVE_BALLS:
       // Compute wall bounces
@@ -57,6 +58,17 @@ export function reducer(state, { type, payload }) {
             },
           };
         }, {});
+      break;
+
+    case ACTIONS.LEFT_MOVE:
+      const newLeft = state.left - 10;
+      state.left = newLeft < 0 ? state.left : newLeft;
+      break;
+
+    case ACTIONS.RIGHT_MOVE:
+      const newRight = state.left + 10;
+      state.left = newRight > 302 ? state.left : newRight;
+      break;
     
     default:
       break;
@@ -72,6 +84,8 @@ export const initialState = {
   activeBalls: {},
   activeX: {},
   activeY: {},
+
+  left: 152,
 };
 
 export const getRandomValidX = () => {
