@@ -28903,17 +28903,20 @@ var ACTIONS = exports.ACTIONS = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = void 0;
+exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = void 0;
 var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
 var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
 var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
+var CENTER_LEFT_PX = exports.CENTER_LEFT_PX = 152;
+var DEFAULT_DX = exports.DEFAULT_DX = 3;
+var DEFAULT_DY = exports.DEFAULT_DY = 3;
 },{}],"src/containers/Game/reducer.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initialState = exports.getRandomValidY = exports.getRandomValidX = void 0;
+exports.initialState = exports.getRandomValidY = exports.getRandomValidX = exports.createNewActiveBall = void 0;
 exports.reducer = reducer;
 var _ACTIONS = require("../../ACTIONS");
 var _CONSTANTS = require("../../CONSTANTS");
@@ -28931,12 +28934,8 @@ function reducer(state, _ref) {
       if (payload) {
         state.canvasRef = payload;
         state.canvasContext = payload.getContext('2d');
-        state.activeBalls[crypto.randomUUID()] = {
-          x: _getRandomValidX(),
-          y: _getRandomValidY(),
-          dx: 5,
-          dy: 5
-        };
+        var newBall = createNewActiveBall();
+        state.activeBalls[newBall.id] = _objectSpread({}, newBall);
       }
       break;
     case _ACTIONS.ACTIONS.MOVE_BALLS:
@@ -28993,7 +28992,7 @@ var initialState = exports.initialState = {
   activeBalls: {},
   activeX: {},
   activeY: {},
-  left: 152
+  left: _CONSTANTS.CENTER_LEFT_PX
 };
 var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
   var x = Math.round(Math.random() * 1000);
@@ -29002,6 +29001,15 @@ var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
 var _getRandomValidY = exports.getRandomValidY = function getRandomValidY() {
   var y = Math.round(Math.random() * 1000);
   return y < _CONSTANTS.CANVAS_HEIGHT ? y : _getRandomValidY();
+};
+var createNewActiveBall = exports.createNewActiveBall = function createNewActiveBall() {
+  return {
+    id: crypto.randomUUID(),
+    x: _getRandomValidX(),
+    y: _getRandomValidY(),
+    dx: _CONSTANTS.DEFAULT_DX,
+    dy: _CONSTANTS.DEFAULT_DY
+  };
 };
 },{"../../ACTIONS":"src/ACTIONS.js","../../CONSTANTS":"src/CONSTANTS.js"}],"src/services/ballHandler.js":[function(require,module,exports) {
 "use strict";

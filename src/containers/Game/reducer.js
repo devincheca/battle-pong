@@ -1,5 +1,5 @@
 import { ACTIONS } from '../../ACTIONS';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../CONSTANTS';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, CENTER_LEFT_PX, DEFAULT_DX, DEFAULT_DY } from '../../CONSTANTS';
 
 export function reducer(state, { type, payload }) {
   switch(type) {
@@ -10,12 +10,8 @@ export function reducer(state, { type, payload }) {
       
         state.canvasContext = payload.getContext('2d');
 
-        state.activeBalls[crypto.randomUUID()] = {
-          x: getRandomValidX(),
-          y: getRandomValidY(),
-          dx: 5,
-          dy: 5,
-        };
+        const newBall = createNewActiveBall();
+        state.activeBalls[newBall.id] = { ...newBall };
       }
       break;
 
@@ -25,8 +21,10 @@ export function reducer(state, { type, payload }) {
         .reduce((acc, key) => {
           const activeBall = state.activeBalls[key];
           const { x, y } = activeBall;
+
           if (x > CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
           if (y > CANVAS_HEIGHT || y < 0) activeBall.dy = activeBall.dy * -1;
+
           return {
             ...acc,
             [key]: {
@@ -46,9 +44,12 @@ export function reducer(state, { type, payload }) {
         .reduce((acc, key) => {
           const activeBall = state.activeBalls[key];
           const { x, y } = activeBall;
+
           let { dx, dy } = activeBall;
+
           if (state.activeX[x] && state.activeX[x] !== key) dx = dx * -1;
           if (state.activeY[y] && state.activeY[y] !== key) dy = dy * -1;
+
           return {
             ...acc,
             [key]: {
@@ -85,7 +86,7 @@ export const initialState = {
   activeX: {},
   activeY: {},
 
-  left: 152,
+  left: CENTER_LEFT_PX,
 };
 
 export const getRandomValidX = () => {
@@ -96,4 +97,12 @@ export const getRandomValidX = () => {
 export const getRandomValidY = () => {
   const y = Math.round(Math.random() * 1000);
   return y < CANVAS_HEIGHT ? y : getRandomValidY();
-}
+};
+
+export const createNewActiveBall = () => ({
+  id: crypto.randomUUID(),
+  x: getRandomValidX(),
+  y: getRandomValidY(),
+  dx: DEFAULT_DX,
+  dy: DEFAULT_DY,
+});
