@@ -48,7 +48,7 @@ export default function Canvas() {
           backgroundColor: 'red',
           borderTopLeftRadius: '5em',
           borderTopRightRadius: '5em',
-          padding: '.5em',
+          padding: '10px',
           color: 'red',
         }}>VVV</span>
       </div>

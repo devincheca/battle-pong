@@ -28903,7 +28903,7 @@ var ACTIONS = exports.ACTIONS = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = exports.ARROW_RIGHT_KEY = exports.ARROW_LEFT_KEY = void 0;
+exports.MOVEMENT_INTERVAL = exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = exports.ARROW_RIGHT_KEY = exports.ARROW_LEFT_KEY = void 0;
 var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
 var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
 var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
@@ -28912,22 +28912,106 @@ var DEFAULT_DX = exports.DEFAULT_DX = 3;
 var DEFAULT_DY = exports.DEFAULT_DY = 3;
 var ARROW_LEFT_KEY = exports.ARROW_LEFT_KEY = 'ArrowLeft';
 var ARROW_RIGHT_KEY = exports.ARROW_RIGHT_KEY = 'ArrowRight';
-},{}],"src/containers/Game/reducer.js":[function(require,module,exports) {
+var MOVEMENT_INTERVAL = exports.MOVEMENT_INTERVAL = 18;
+},{}],"src/containers/Game/ball-helpers.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.initialState = exports.getRandomValidY = exports.getRandomValidX = exports.createNewActiveBall = void 0;
-exports.reducer = reducer;
-var _ACTIONS = require("../../ACTIONS");
+exports.removeOutOfBoundsBalls = exports.getRandomValidY = exports.getRandomValidX = exports.createNewActiveBall = void 0;
 var _CONSTANTS = require("../../CONSTANTS");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // Constants
+var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
+  var x = Math.round(Math.random() * 1000);
+  return x < _CONSTANTS.CANVAS_WIDTH ? x : _getRandomValidX();
+};
+var _getRandomValidY = exports.getRandomValidY = function getRandomValidY() {
+  var y = Math.round(Math.random() * 1000);
+  return y < _CONSTANTS.CANVAS_HEIGHT ? y : _getRandomValidY();
+};
+var createNewActiveBall = exports.createNewActiveBall = function createNewActiveBall() {
+  return {
+    id: crypto.randomUUID(),
+    x: _getRandomValidX(),
+    y: _getRandomValidY(),
+    dx: _CONSTANTS.DEFAULT_DX,
+    dy: _CONSTANTS.DEFAULT_DY
+  };
+};
+var removeOutOfBoundsBalls = exports.removeOutOfBoundsBalls = function removeOutOfBoundsBalls(balls) {
+  return Object.keys(balls).reduce(function (acc, key) {
+    var activeBall = balls[key];
+    var toRemove = activeBall.toRemove;
+    if (toRemove) return acc;
+    return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread({}, activeBall)));
+  }, {});
+};
+},{"../../CONSTANTS":"src/CONSTANTS.js"}],"src/containers/Game/ball-movement.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.computeActiveBalls = void 0;
+var _CONSTANTS = require("../../CONSTANTS");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // Constants
+var computeActiveBalls = exports.computeActiveBalls = function computeActiveBalls(_ref) {
+  var activeBalls = _ref.activeBalls,
+    left = _ref.left;
+  return Object.keys(activeBalls).reduce(function (acc, key) {
+    var activeBall = activeBalls[key];
+    var x = activeBall.x,
+      y = activeBall.y;
+    var toRemove = false;
+    if (x > _CONSTANTS.CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
+    if (y < 0) activeBall.dy = activeBall.dy * -1;
+    if (y > _CONSTANTS.CANVAS_HEIGHT) {
+      var bumperPoint = left + 30;
+      var bumperWindow = 15;
+      if (x >= bumperPoint - bumperWindow && x <= bumperPoint + bumperWindow) {
+        activeBall.dx = activeBall.dx * -1;
+        activeBall.dy = activeBall.dy * -1;
+      } else {
+        toRemove = true;
+      }
+    }
+    return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread(_objectSpread({}, activeBall), {}, {
+      x: activeBall.x + activeBall.dx,
+      y: activeBall.y + activeBall.dy,
+      toRemove: toRemove
+    })));
+  }, {});
+};
+},{"../../CONSTANTS":"src/CONSTANTS.js"}],"src/containers/Game/reducer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initialState = void 0;
+exports.reducer = reducer;
+var _ACTIONS = require("../../ACTIONS");
+var _CONSTANTS = require("../../CONSTANTS");
+var _ballHelpers = require("./ball-helpers");
+var _ballMovement = require("./ball-movement");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); } // Redux
+// Helpers
 function reducer(state, _ref) {
   var type = _ref.type,
     payload = _ref.payload;
@@ -28936,27 +29020,14 @@ function reducer(state, _ref) {
       if (payload) {
         state.canvasRef = payload;
         state.canvasContext = payload.getContext('2d');
-        var newBall = createNewActiveBall();
+        var newBall = (0, _ballHelpers.createNewActiveBall)();
         state.activeBalls[newBall.id] = _objectSpread({}, newBall);
       }
       break;
     case _ACTIONS.ACTIONS.MOVE_BALLS:
       // Compute wall bounces & blocks 
-      state.activeBalls = Object.keys(state.activeBalls).reduce(function (acc, key) {
-        var activeBall = state.activeBalls[key];
-        var x = activeBall.x,
-          y = activeBall.y;
-        if (x > _CONSTANTS.CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
-        if (y < 0) activeBall.dy = activeBall.dy * -1;
-        if (y > _CONSTANTS.CANVAS_HEIGHT) {
-          activeBall.dx = activeBall.dx * -1;
-          activeBall.dy = activeBall.dy * -1;
-        }
-        return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread(_objectSpread({}, activeBall), {}, {
-          x: activeBall.x + activeBall.dx,
-          y: activeBall.y + activeBall.dy
-        })));
-      }, {});
+      state.activeBalls = (0, _ballMovement.computeActiveBalls)(state);
+      state.activeBalls = (0, _ballHelpers.removeOutOfBoundsBalls)(state.activeBalls);
 
       // Computer ball bounces
       state.activeX = Object.keys(state.activeBalls).reduce(function (acc, key) {
@@ -28980,11 +29051,11 @@ function reducer(state, _ref) {
       }, {});
       break;
     case _ACTIONS.ACTIONS.LEFT_MOVE:
-      var newLeft = state.left - 20;
+      var newLeft = state.left - _CONSTANTS.MOVEMENT_INTERVAL;
       state.left = newLeft < 0 ? state.left : newLeft;
       break;
     case _ACTIONS.ACTIONS.RIGHT_MOVE:
-      var newRight = state.left + 20;
+      var newRight = state.left + _CONSTANTS.MOVEMENT_INTERVAL;
       state.left = newRight > 302 ? state.left : newRight;
       break;
     default:
@@ -29000,24 +29071,7 @@ var initialState = exports.initialState = {
   activeY: {},
   left: _CONSTANTS.CENTER_LEFT_PX
 };
-var _getRandomValidX = exports.getRandomValidX = function getRandomValidX() {
-  var x = Math.round(Math.random() * 1000);
-  return x < _CONSTANTS.CANVAS_WIDTH ? x : _getRandomValidX();
-};
-var _getRandomValidY = exports.getRandomValidY = function getRandomValidY() {
-  var y = Math.round(Math.random() * 1000);
-  return y < _CONSTANTS.CANVAS_HEIGHT ? y : _getRandomValidY();
-};
-var createNewActiveBall = exports.createNewActiveBall = function createNewActiveBall() {
-  return {
-    id: crypto.randomUUID(),
-    x: _getRandomValidX(),
-    y: _getRandomValidY(),
-    dx: _CONSTANTS.DEFAULT_DX,
-    dy: _CONSTANTS.DEFAULT_DY
-  };
-};
-},{"../../ACTIONS":"src/ACTIONS.js","../../CONSTANTS":"src/CONSTANTS.js"}],"src/services/ballHandler.js":[function(require,module,exports) {
+},{"../../ACTIONS":"src/ACTIONS.js","../../CONSTANTS":"src/CONSTANTS.js","./ball-helpers":"src/containers/Game/ball-helpers.js","./ball-movement":"src/containers/Game/ball-movement.js"}],"src/services/ballHandler.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -29115,7 +29169,7 @@ function Canvas() {
       backgroundColor: 'red',
       borderTopLeftRadius: '5em',
       borderTopRightRadius: '5em',
-      padding: '.5em',
+      padding: '10px',
       color: 'red'
     }
   }, "VVV")));
@@ -29311,7 +29365,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49984" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49843" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

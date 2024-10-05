@@ -6,3 +6,4 @@ export const DEFAULT_DX = 3;
 export const DEFAULT_DY = 3;
 export const ARROW_LEFT_KEY = 'ArrowLeft';
 export const ARROW_RIGHT_KEY = 'ArrowRight';
+export const MOVEMENT_INTERVAL = 18;

@@ -1,5 +1,15 @@
+// Redux
 import { ACTIONS } from '../../ACTIONS';
-import { CANVAS_HEIGHT, CANVAS_WIDTH, CENTER_LEFT_PX, DEFAULT_DX, DEFAULT_DY } from '../../CONSTANTS';
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  CENTER_LEFT_PX,
+  MOVEMENT_INTERVAL,
+} from '../../CONSTANTS';
+
+// Helpers
+import { createNewActiveBall, removeOutOfBoundsBalls } from './ball-helpers';
+import { computeActiveBalls } from './ball-movement';
 
 export function reducer(state, { type, payload }) {
   switch(type) {
@@ -17,27 +27,9 @@ export function reducer(state, { type, payload }) {
 
     case ACTIONS.MOVE_BALLS:
       // Compute wall bounces & blocks 
-      state.activeBalls = Object.keys(state.activeBalls)
-        .reduce((acc, key) => {
-          const activeBall = state.activeBalls[key];
-          const { x, y } = activeBall;
-
-          if (x > CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
-          if (y < 0) activeBall.dy = activeBall.dy * -1;
-          if (y > CANVAS_HEIGHT) {
-            activeBall.dx = activeBall.dx * -1;
-            activeBall.dy = activeBall.dy * -1;
-          }
-
-          return {
-            ...acc,
-            [key]: {
-              ...activeBall,
-              x: activeBall.x + activeBall.dx,
-              y: activeBall.y + activeBall.dy,
-            },
-          };
-        }, {});
+      state.activeBalls = computeActiveBalls(state);
+      
+      state.activeBalls = removeOutOfBoundsBalls(state.activeBalls);
 
       // Computer ball bounces
       state.activeX = Object.keys(state.activeBalls)
@@ -66,12 +58,12 @@ export function reducer(state, { type, payload }) {
       break;
 
     case ACTIONS.LEFT_MOVE:
-      const newLeft = state.left - 20;
+      const newLeft = state.left - MOVEMENT_INTERVAL;
       state.left = newLeft < 0 ? state.left : newLeft;
       break;
 
     case ACTIONS.RIGHT_MOVE:
-      const newRight = state.left + 20;
+      const newRight = state.left + MOVEMENT_INTERVAL;
       state.left = newRight > 302 ? state.left : newRight;
       break;
     
@@ -92,21 +84,3 @@ export const initialState = {
 
   left: CENTER_LEFT_PX,
 };
-
-export const getRandomValidX = () => {
-  const x = Math.round(Math.random() * 1000);
-  return x < CANVAS_WIDTH ? x : getRandomValidX();
-};
-
-export const getRandomValidY = () => {
-  const y = Math.round(Math.random() * 1000);
-  return y < CANVAS_HEIGHT ? y : getRandomValidY();
-};
-
-export const createNewActiveBall = () => ({
-  id: crypto.randomUUID(),
-  x: getRandomValidX(),
-  y: getRandomValidY(),
-  dx: DEFAULT_DX,
-  dy: DEFAULT_DY,
-});
