@@ -28903,13 +28903,15 @@ var ACTIONS = exports.ACTIONS = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = void 0;
+exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = exports.ARROW_RIGHT_KEY = exports.ARROW_LEFT_KEY = void 0;
 var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
 var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
 var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
 var CENTER_LEFT_PX = exports.CENTER_LEFT_PX = 152;
 var DEFAULT_DX = exports.DEFAULT_DX = 3;
 var DEFAULT_DY = exports.DEFAULT_DY = 3;
+var ARROW_LEFT_KEY = exports.ARROW_LEFT_KEY = 'ArrowLeft';
+var ARROW_RIGHT_KEY = exports.ARROW_RIGHT_KEY = 'ArrowRight';
 },{}],"src/containers/Game/reducer.js":[function(require,module,exports) {
 "use strict";
 
@@ -28939,13 +28941,17 @@ function reducer(state, _ref) {
       }
       break;
     case _ACTIONS.ACTIONS.MOVE_BALLS:
-      // Compute wall bounces
+      // Compute wall bounces & blocks 
       state.activeBalls = Object.keys(state.activeBalls).reduce(function (acc, key) {
         var activeBall = state.activeBalls[key];
         var x = activeBall.x,
           y = activeBall.y;
         if (x > _CONSTANTS.CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
-        if (y > _CONSTANTS.CANVAS_HEIGHT || y < 0) activeBall.dy = activeBall.dy * -1;
+        if (y < 0) activeBall.dy = activeBall.dy * -1;
+        if (y > _CONSTANTS.CANVAS_HEIGHT) {
+          activeBall.dx = activeBall.dx * -1;
+          activeBall.dy = activeBall.dy * -1;
+        }
         return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread(_objectSpread({}, activeBall), {}, {
           x: activeBall.x + activeBall.dx,
           y: activeBall.y + activeBall.dy
@@ -28974,11 +28980,11 @@ function reducer(state, _ref) {
       }, {});
       break;
     case _ACTIONS.ACTIONS.LEFT_MOVE:
-      var newLeft = state.left - 10;
+      var newLeft = state.left - 20;
       state.left = newLeft < 0 ? state.left : newLeft;
       break;
     case _ACTIONS.ACTIONS.RIGHT_MOVE:
-      var newRight = state.left + 10;
+      var newRight = state.left + 20;
       state.left = newRight > 302 ? state.left : newRight;
       break;
     default:
@@ -29107,8 +29113,8 @@ function Canvas() {
       position: 'relative',
       left: "".concat(left, "px"),
       backgroundColor: 'red',
-      borderBottomLeftRadius: '5em',
-      borderBottomRightRadius: '5em',
+      borderTopLeftRadius: '5em',
+      borderTopRightRadius: '5em',
       padding: '.5em',
       color: 'red'
     }
@@ -29176,9 +29182,11 @@ exports.GameContext = void 0;
 exports.default = Game;
 var _react = _interopRequireWildcard(require("react"));
 var _reducer = require("./reducer");
+var _ACTIONS = require("../../ACTIONS");
 var _Canvas = _interopRequireDefault(require("../Canvas"));
 var _DPad = _interopRequireDefault(require("../DPad"));
 var _ActionButtons = _interopRequireDefault(require("../ActionButtons"));
+var _CONSTANTS = require("../../CONSTANTS");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
@@ -29189,12 +29197,27 @@ function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length)
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; } // Redux
 // Containers
+// Constants
 var GameContext = exports.GameContext = (0, _react.createContext)(null);
 function Game() {
   var _useReducer = (0, _react.useReducer)(_reducer.reducer, _reducer.initialState),
     _useReducer2 = _slicedToArray(_useReducer, 2),
     state = _useReducer2[0],
     dispatch = _useReducer2[1];
+  (0, _react.useEffect)(function () {
+    window.onkeydown = function (_ref) {
+      var key = _ref.key;
+      if (key === _CONSTANTS.ARROW_LEFT_KEY) dispatch({
+        type: _ACTIONS.ACTIONS.LEFT_MOVE
+      });
+      if (key === _CONSTANTS.ARROW_RIGHT_KEY) dispatch({
+        type: _ACTIONS.ACTIONS.RIGHT_MOVE
+      });
+    };
+    return function () {
+      return window.onkeydown = null;
+    };
+  }, []);
   return /*#__PURE__*/_react.default.createElement("div", {
     style: {
       display: 'flex',
@@ -29208,7 +29231,7 @@ function Game() {
     }
   }, /*#__PURE__*/_react.default.createElement(_DPad.default, null), /*#__PURE__*/_react.default.createElement(_Canvas.default, null), /*#__PURE__*/_react.default.createElement(_ActionButtons.default, null)));
 }
-},{"react":"node_modules/react/index.js","./reducer":"src/containers/Game/reducer.js","../Canvas":"src/containers/Canvas.js","../DPad":"src/containers/DPad.js","../ActionButtons":"src/containers/ActionButtons.js"}],"App.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","./reducer":"src/containers/Game/reducer.js","../../ACTIONS":"src/ACTIONS.js","../Canvas":"src/containers/Canvas.js","../DPad":"src/containers/DPad.js","../ActionButtons":"src/containers/ActionButtons.js","../../CONSTANTS":"src/CONSTANTS.js"}],"App.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

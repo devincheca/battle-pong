@@ -16,14 +16,18 @@ export function reducer(state, { type, payload }) {
       break;
 
     case ACTIONS.MOVE_BALLS:
-      // Compute wall bounces
+      // Compute wall bounces & blocks 
       state.activeBalls = Object.keys(state.activeBalls)
         .reduce((acc, key) => {
           const activeBall = state.activeBalls[key];
           const { x, y } = activeBall;
 
           if (x > CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
-          if (y > CANVAS_HEIGHT || y < 0) activeBall.dy = activeBall.dy * -1;
+          if (y < 0) activeBall.dy = activeBall.dy * -1;
+          if (y > CANVAS_HEIGHT) {
+            activeBall.dx = activeBall.dx * -1;
+            activeBall.dy = activeBall.dy * -1;
+          }
 
           return {
             ...acc,
@@ -62,12 +66,12 @@ export function reducer(state, { type, payload }) {
       break;
 
     case ACTIONS.LEFT_MOVE:
-      const newLeft = state.left - 10;
+      const newLeft = state.left - 20;
       state.left = newLeft < 0 ? state.left : newLeft;
       break;
 
     case ACTIONS.RIGHT_MOVE:
-      const newRight = state.left + 10;
+      const newRight = state.left + 20;
       state.left = newRight > 302 ? state.left : newRight;
       break;
     
