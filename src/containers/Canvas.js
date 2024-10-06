@@ -13,6 +13,8 @@ export default function Canvas() {
 
   const { state, dispatch } = useContext(GameContext);
 
+  const { left } = state;
+
   useEffect(() => {
     dispatch({
       type: ACTIONS.SAVE_CANVAS_REF,
@@ -22,15 +24,42 @@ export default function Canvas() {
 
   useEffect(() => {
     if (Object.keys(state.activeBalls).length) {
-      const illustrator = new BallIllustrator();
-      illustrator.ctx = state.canvasContext;
-      illustrator.activeBalls = state.activeBalls;
-      illustrator.drawBalls();
-      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 10);
+      window.battlePong = {
+        illustrator: {
+          drawBalls: () => {
+            const illustrator = new BallIllustrator();
+            illustrator.ctx = state.canvasContext;
+            illustrator.activeBalls = state.activeBalls;
+            illustrator.drawBalls();
+            setTimeout(() => window.battlePong.illustrator.drawBalls(), 5);
+          }
+        }
+      };
+      setTimeout(() => window.battlePong.illustrator.drawBalls(), 5);
+      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 5);
     }
   }, [Object.keys(state.activeBalls)])
 
+  const border = {
+    borderTop: '.1em solid black',
+    borderLeft: '.1em solid black',
+    borderRight: '.1em solid black',
+  };
+
   return (
-    <canvas ref={canvasRef} id={CANVAS_ID} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
+    <div>
+      <canvas style={{ ...border }} ref={canvasRef} id={CANVAS_ID} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}></canvas>
+      <div>
+        <span style={{
+          position: 'relative',
+          left: `${left}px`,
+          backgroundColor: 'red',
+          borderTopLeftRadius: '5em',
+          borderTopRightRadius: '5em',
+          padding: '10px',
+          color: 'red',
+        }}>VVV</span>
+      </div>
+    </div>
   )
 }

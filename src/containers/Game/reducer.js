@@ -1,5 +1,15 @@
+// Redux
 import { ACTIONS } from '../../ACTIONS';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../../CONSTANTS';
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  CENTER_LEFT_PX,
+  MOVEMENT_INTERVAL,
+} from '../../CONSTANTS';
+
+// Helpers
+import { createNewActiveBall, removeOutOfBoundsBalls } from './ball-helpers';
+import { computeActiveBalls } from './ball-movement';
 
 export function reducer(state, { type, payload }) {
   switch(type) {
@@ -10,31 +20,16 @@ export function reducer(state, { type, payload }) {
       
         state.canvasContext = payload.getContext('2d');
 
-        state.activeBalls[crypto.randomUUID()] = {
-          x: getRandomValidX(),
-          y: getRandomValidY(),
-          dx: 5,
-          dy: 5,
-        };
+        const newBall = createNewActiveBall();
+        state.activeBalls[newBall.id] = { ...newBall };
       }
+      break;
 
     case ACTIONS.MOVE_BALLS:
-      // Compute wall bounces
-      state.activeBalls = Object.keys(state.activeBalls)
-        .reduce((acc, key) => {
-          const activeBall = state.activeBalls[key];
-          const { x, y } = activeBall;
-          if (x > CANVAS_WIDTH || x < 0) activeBall.dx = activeBall.dx * -1;
-          if (y > CANVAS_HEIGHT || y < 0) activeBall.dy = activeBall.dy * -1;
-          return {
-            ...acc,
-            [key]: {
-              ...activeBall,
-              x: activeBall.x + activeBall.dx,
-              y: activeBall.y + activeBall.dy,
-            },
-          };
-        }, {});
+      // Compute wall bounces & blocks 
+      state.activeBalls = computeActiveBalls(state);
+      
+      state.activeBalls = removeOutOfBoundsBalls(state.activeBalls);
 
       // Computer ball bounces
       state.activeX = Object.keys(state.activeBalls)
@@ -45,9 +40,12 @@ export function reducer(state, { type, payload }) {
         .reduce((acc, key) => {
           const activeBall = state.activeBalls[key];
           const { x, y } = activeBall;
+
           let { dx, dy } = activeBall;
+
           if (state.activeX[x] && state.activeX[x] !== key) dx = dx * -1;
           if (state.activeY[y] && state.activeY[y] !== key) dy = dy * -1;
+
           return {
             ...acc,
             [key]: {
@@ -57,6 +55,17 @@ export function reducer(state, { type, payload }) {
             },
           };
         }, {});
+      break;
+
+    case ACTIONS.LEFT_MOVE:
+      const newLeft = state.left - MOVEMENT_INTERVAL;
+      state.left = newLeft < 0 ? state.left : newLeft;
+      break;
+
+    case ACTIONS.RIGHT_MOVE:
+      const newRight = state.left + MOVEMENT_INTERVAL;
+      state.left = newRight > 302 ? state.left : newRight;
+      break;
     
     default:
       break;
@@ -72,14 +81,6 @@ export const initialState = {
   activeBalls: {},
   activeX: {},
   activeY: {},
-};
 
-export const getRandomValidX = () => {
-  const x = Math.round(Math.random() * 1000);
-  return x < CANVAS_WIDTH ? x : getRandomValidX();
+  left: CENTER_LEFT_PX,
 };
-
-export const getRandomValidY = () => {
-  const y = Math.round(Math.random() * 1000);
-  return y < CANVAS_HEIGHT ? y : getRandomValidY();
-}
