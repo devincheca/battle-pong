@@ -28908,11 +28908,11 @@ var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
 var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
 var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
 var CENTER_LEFT_PX = exports.CENTER_LEFT_PX = 152;
-var DEFAULT_DX = exports.DEFAULT_DX = 3;
-var DEFAULT_DY = exports.DEFAULT_DY = 3;
+var DEFAULT_DX = exports.DEFAULT_DX = 8;
+var DEFAULT_DY = exports.DEFAULT_DY = 8;
 var ARROW_LEFT_KEY = exports.ARROW_LEFT_KEY = 'ArrowLeft';
 var ARROW_RIGHT_KEY = exports.ARROW_RIGHT_KEY = 'ArrowRight';
-var MOVEMENT_INTERVAL = exports.MOVEMENT_INTERVAL = 18;
+var MOVEMENT_INTERVAL = exports.MOVEMENT_INTERVAL = 20;
 },{}],"src/containers/Game/ball-helpers.js":[function(require,module,exports) {
 "use strict";
 
@@ -28948,7 +28948,10 @@ var removeOutOfBoundsBalls = exports.removeOutOfBoundsBalls = function removeOut
   return Object.keys(balls).reduce(function (acc, key) {
     var activeBall = balls[key];
     var toRemove = activeBall.toRemove;
-    if (toRemove) return acc;
+    if (toRemove) {
+      var newBall = createNewActiveBall();
+      return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, newBall.id, _objectSpread({}, newBall)));
+    }
     return _objectSpread(_objectSpread({}, acc), {}, _defineProperty({}, key, _objectSpread({}, activeBall)));
   }, {});
 };
@@ -29140,15 +29143,27 @@ function Canvas() {
   }, [canvasRef.current]);
   (0, _react.useEffect)(function () {
     if (Object.keys(state.activeBalls).length) {
-      var illustrator = new _ballHandler.BallIllustrator();
-      illustrator.ctx = state.canvasContext;
-      illustrator.activeBalls = state.activeBalls;
-      illustrator.drawBalls();
+      window.battlePong = {
+        illustrator: {
+          drawBalls: function drawBalls() {
+            var illustrator = new _ballHandler.BallIllustrator();
+            illustrator.ctx = state.canvasContext;
+            illustrator.activeBalls = state.activeBalls;
+            illustrator.drawBalls();
+            setTimeout(function () {
+              return window.battlePong.illustrator.drawBalls();
+            }, 5);
+          }
+        }
+      };
+      setTimeout(function () {
+        return window.battlePong.illustrator.drawBalls();
+      }, 5);
       setTimeout(function () {
         return dispatch({
           type: _ACTIONS.ACTIONS.MOVE_BALLS
         });
-      }, 10);
+      }, 5);
     }
   }, [Object.keys(state.activeBalls)]);
   var border = {
@@ -29365,7 +29380,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49843" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53489" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

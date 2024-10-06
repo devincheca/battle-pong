@@ -24,11 +24,19 @@ export default function Canvas() {
 
   useEffect(() => {
     if (Object.keys(state.activeBalls).length) {
-      const illustrator = new BallIllustrator();
-      illustrator.ctx = state.canvasContext;
-      illustrator.activeBalls = state.activeBalls;
-      illustrator.drawBalls();
-      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 10);
+      window.battlePong = {
+        illustrator: {
+          drawBalls: () => {
+            const illustrator = new BallIllustrator();
+            illustrator.ctx = state.canvasContext;
+            illustrator.activeBalls = state.activeBalls;
+            illustrator.drawBalls();
+            setTimeout(() => window.battlePong.illustrator.drawBalls(), 5);
+          }
+        }
+      };
+      setTimeout(() => window.battlePong.illustrator.drawBalls(), 5);
+      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 5);
     }
   }, [Object.keys(state.activeBalls)])
 

@@ -25,7 +25,14 @@ export const removeOutOfBoundsBalls = balls => {
       const activeBall = balls[key];
       const { toRemove } = activeBall;
 
-      if (toRemove) return acc;
+      if (toRemove) {
+        const newBall = createNewActiveBall();
+
+        return {
+          ...acc,
+          [newBall.id]: { ...newBall },
+        };
+      }
 
       return { ...acc, [key]: { ...activeBall }};
     }, {});
