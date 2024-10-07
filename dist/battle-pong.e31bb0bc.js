@@ -29143,27 +29143,15 @@ function Canvas() {
   }, [canvasRef.current]);
   (0, _react.useEffect)(function () {
     if (Object.keys(state.activeBalls).length) {
-      window.battlePong = {
-        illustrator: {
-          drawBalls: function drawBalls() {
-            var illustrator = new _ballHandler.BallIllustrator();
-            illustrator.ctx = state.canvasContext;
-            illustrator.activeBalls = state.activeBalls;
-            illustrator.drawBalls();
-            setTimeout(function () {
-              return window.battlePong.illustrator.drawBalls();
-            }, 5);
-          }
-        }
-      };
-      setTimeout(function () {
-        return window.battlePong.illustrator.drawBalls();
-      }, 5);
+      var illustrator = new _ballHandler.BallIllustrator();
+      illustrator.ctx = state.canvasContext;
+      illustrator.activeBalls = state.activeBalls;
+      illustrator.drawBalls();
       setTimeout(function () {
         return dispatch({
           type: _ACTIONS.ACTIONS.MOVE_BALLS
         });
-      }, 5);
+      }, 30);
     }
   }, [Object.keys(state.activeBalls)]);
   var border = {
@@ -29380,7 +29368,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53489" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55994" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
