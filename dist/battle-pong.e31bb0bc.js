@@ -28903,7 +28903,7 @@ var ACTIONS = exports.ACTIONS = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.MOVEMENT_INTERVAL = exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = exports.ARROW_RIGHT_KEY = exports.ARROW_LEFT_KEY = void 0;
+exports.WINDOW_STATE = exports.RENDER_INTERVAL = exports.MOVEMENT_INTERVAL = exports.DEFAULT_DY = exports.DEFAULT_DX = exports.CENTER_LEFT_PX = exports.CANVAS_WIDTH = exports.CANVAS_ID = exports.CANVAS_HEIGHT = exports.BUMPER_WINDOW = exports.ARROW_RIGHT_KEY = exports.ARROW_LEFT_KEY = void 0;
 var CANVAS_ID = exports.CANVAS_ID = 'ball-pit';
 var CANVAS_HEIGHT = exports.CANVAS_HEIGHT = 350;
 var CANVAS_WIDTH = exports.CANVAS_WIDTH = 350;
@@ -28912,7 +28912,10 @@ var DEFAULT_DX = exports.DEFAULT_DX = 8;
 var DEFAULT_DY = exports.DEFAULT_DY = 8;
 var ARROW_LEFT_KEY = exports.ARROW_LEFT_KEY = 'ArrowLeft';
 var ARROW_RIGHT_KEY = exports.ARROW_RIGHT_KEY = 'ArrowRight';
-var MOVEMENT_INTERVAL = exports.MOVEMENT_INTERVAL = 20;
+var MOVEMENT_INTERVAL = exports.MOVEMENT_INTERVAL = 60;
+var WINDOW_STATE = exports.WINDOW_STATE = 'STATE';
+var RENDER_INTERVAL = exports.RENDER_INTERVAL = 50;
+var BUMPER_WINDOW = exports.BUMPER_WINDOW = 20;
 },{}],"src/containers/Game/ball-helpers.js":[function(require,module,exports) {
 "use strict";
 
@@ -28981,8 +28984,7 @@ var computeActiveBalls = exports.computeActiveBalls = function computeActiveBall
     if (y < 0) activeBall.dy = activeBall.dy * -1;
     if (y > _CONSTANTS.CANVAS_HEIGHT) {
       var bumperPoint = left + 30;
-      var bumperWindow = 15;
-      if (x >= bumperPoint - bumperWindow && x <= bumperPoint + bumperWindow) {
+      if (x >= bumperPoint - _CONSTANTS.BUMPER_WINDOW && x <= bumperPoint + _CONSTANTS.BUMPER_WINDOW) {
         activeBall.dx = activeBall.dx * -1;
         activeBall.dy = activeBall.dy * -1;
       } else {
@@ -29021,8 +29023,6 @@ function reducer(state, _ref) {
   switch (type) {
     case _ACTIONS.ACTIONS.SAVE_CANVAS_REF:
       if (payload) {
-        state.canvasRef = payload;
-        state.canvasContext = payload.getContext('2d');
         var newBall = (0, _ballHelpers.createNewActiveBall)();
         state.activeBalls[newBall.id] = _objectSpread({}, newBall);
       }
@@ -29064,6 +29064,7 @@ function reducer(state, _ref) {
     default:
       break;
   }
+  window.localStorage.setItem(_CONSTANTS.WINDOW_STATE, JSON.stringify(state));
   return _objectSpread({}, state);
 }
 var initialState = exports.initialState = {
@@ -29080,7 +29081,7 @@ var initialState = exports.initialState = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.BallIllustrator = void 0;
+exports.canvasRenderer = exports.BallIllustrator = void 0;
 var _CONSTANTS = require("../CONSTANTS");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
@@ -29088,6 +29089,20 @@ function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = 
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+var _canvasRenderer = exports.canvasRenderer = function canvasRenderer() {
+  setTimeout(function () {
+    return _canvasRenderer();
+  }, _CONSTANTS.RENDER_INTERVAL);
+  var state = JSON.parse(window.localStorage.getItem(_CONSTANTS.WINDOW_STATE));
+  if (state && state.activeBalls) {
+    var activeBalls = state.activeBalls;
+    var illustrator = new BallIllustrator();
+    var canvasContext = document.getElementById(_CONSTANTS.CANVAS_ID).getContext('2d');
+    illustrator.ctx = canvasContext;
+    illustrator.activeBalls = activeBalls;
+    illustrator.drawBalls();
+  }
+};
 var BallIllustrator = exports.BallIllustrator = /*#__PURE__*/function () {
   function BallIllustrator() {
     _classCallCheck(this, BallIllustrator);
@@ -29142,22 +29157,21 @@ function Canvas() {
     });
   }, [canvasRef.current]);
   (0, _react.useEffect)(function () {
-    if (Object.keys(state.activeBalls).length) {
-      var illustrator = new _ballHandler.BallIllustrator();
-      illustrator.ctx = state.canvasContext;
-      illustrator.activeBalls = state.activeBalls;
-      illustrator.drawBalls();
-      setTimeout(function () {
-        return dispatch({
-          type: _ACTIONS.ACTIONS.MOVE_BALLS
-        });
-      }, 30);
-    }
-  }, [Object.keys(state.activeBalls)]);
+    (0, _ballHandler.canvasRenderer)();
+    var intervalId = setInterval(function () {
+      dispatch({
+        type: _ACTIONS.ACTIONS.MOVE_BALLS
+      });
+    }, _CONSTANTS.RENDER_INTERVAL);
+    return function () {
+      return clearInterval(intervalId);
+    };
+  }, [dispatch]);
+  var borderStyles = '.1em solid black';
   var border = {
-    borderTop: '.1em solid black',
-    borderLeft: '.1em solid black',
-    borderRight: '.1em solid black'
+    borderTop: borderStyles,
+    borderLeft: borderStyles,
+    borderRight: borderStyles
   };
   return /*#__PURE__*/_react.default.createElement("div", null, /*#__PURE__*/_react.default.createElement("canvas", {
     style: _objectSpread({}, border),
@@ -29175,7 +29189,7 @@ function Canvas() {
       padding: '10px',
       color: 'red'
     }
-  }, "VVV")));
+  }, "VVVVV")));
 }
 },{"react":"node_modules/react/index.js","../CONSTANTS":"src/CONSTANTS.js","./Game/Game":"src/containers/Game/Game.js","../ACTIONS":"src/ACTIONS.js","../services/ballHandler":"src/services/ballHandler.js"}],"src/containers/DPad.js":[function(require,module,exports) {
 "use strict";
@@ -29368,7 +29382,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55994" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50710" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

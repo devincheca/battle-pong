@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useRef } from 'react';
 
 // Constants
-import { CANVAS_HEIGHT, CANVAS_ID, CANVAS_WIDTH } from '../CONSTANTS';
+import { CANVAS_HEIGHT, CANVAS_ID, CANVAS_WIDTH, RENDER_INTERVAL } from '../CONSTANTS';
 import { GameContext } from './Game/Game';
 import { ACTIONS } from '../ACTIONS';
 
 // Services
-import { BallIllustrator } from '../services/ballHandler';
+import { canvasRenderer } from '../services/ballHandler';
 
 export default function Canvas() {
   const canvasRef = useRef(null);
@@ -23,19 +23,20 @@ export default function Canvas() {
   }, [canvasRef.current]);
 
   useEffect(() => {
-    if (Object.keys(state.activeBalls).length) {
-      const illustrator = new BallIllustrator();
-      illustrator.ctx = state.canvasContext;
-      illustrator.activeBalls = state.activeBalls;
-      illustrator.drawBalls();
-      setTimeout(() => dispatch({ type: ACTIONS.MOVE_BALLS }), 30);
-    }
-  }, [Object.keys(state.activeBalls)])
+    canvasRenderer();
 
+    const intervalId = setInterval(() => {
+      dispatch({ type: ACTIONS.MOVE_BALLS });
+    }, RENDER_INTERVAL);
+  
+    return () => clearInterval(intervalId);
+  }, [dispatch]);
+
+  const borderStyles = '.1em solid black';
   const border = {
-    borderTop: '.1em solid black',
-    borderLeft: '.1em solid black',
-    borderRight: '.1em solid black',
+    borderTop: borderStyles,
+    borderLeft: borderStyles,
+    borderRight: borderStyles,
   };
 
   return (
@@ -50,7 +51,7 @@ export default function Canvas() {
           borderTopRightRadius: '5em',
           padding: '10px',
           color: 'red',
-        }}>VVV</span>
+        }}>VVVVV</span>
       </div>
     </div>
   )
