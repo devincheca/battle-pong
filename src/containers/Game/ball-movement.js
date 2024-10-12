@@ -1,5 +1,5 @@
 // Constants
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../CONSTANTS";
+import { BUMPER_WINDOW, CANVAS_HEIGHT, CANVAS_WIDTH } from "../../CONSTANTS";
 
 export const computeActiveBalls = ({ activeBalls, left }) => Object.keys(activeBalls)
   .reduce((acc, key) => {
@@ -12,9 +12,8 @@ export const computeActiveBalls = ({ activeBalls, left }) => Object.keys(activeB
     if (y < 0) activeBall.dy = activeBall.dy * -1;
     if (y > CANVAS_HEIGHT) {
       const bumperPoint = left + 30;
-      const bumperWindow = 15;
 
-      if (x >= bumperPoint - bumperWindow && x <= bumperPoint + bumperWindow) { 
+      if (x >= bumperPoint - BUMPER_WINDOW && x <= bumperPoint + BUMPER_WINDOW) { 
         activeBall.dx = activeBall.dx * -1;
         activeBall.dy = activeBall.dy * -1;
       } else {

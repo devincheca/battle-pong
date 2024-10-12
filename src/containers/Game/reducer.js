@@ -5,6 +5,7 @@ import {
   CANVAS_WIDTH,
   CENTER_LEFT_PX,
   MOVEMENT_INTERVAL,
+  WINDOW_STATE,
 } from '../../CONSTANTS';
 
 // Helpers
@@ -16,10 +17,6 @@ export function reducer(state, { type, payload }) {
 
     case ACTIONS.SAVE_CANVAS_REF:
       if (payload) {
-        state.canvasRef = payload;
-      
-        state.canvasContext = payload.getContext('2d');
-
         const newBall = createNewActiveBall();
         state.activeBalls[newBall.id] = { ...newBall };
       }
@@ -70,6 +67,8 @@ export function reducer(state, { type, payload }) {
     default:
       break;
   }
+
+  window.localStorage.setItem(WINDOW_STATE, JSON.stringify(state));
 
   return { ...state };
 }
